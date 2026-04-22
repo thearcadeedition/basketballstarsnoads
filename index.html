@@ -5,53 +5,90 @@
     <meta charset="utf-8" />
     <meta http-equiv="x-ua-compatible" content="ie=edge">
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, shrink-to-fit=no" />    
-    <link rel="stylesheet" href="css/app.css" type="text/css" />    
-    <title>Basketball Stars - Ad Free</title>
+    
+    <link rel="stylesheet" href="assets/css/app.css" type="text/css" />    
+    
+    <title>Basketball Stars - Clean Version</title>
     
     <style>
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; overflow: hidden; background-color: #000; }
-        canvas { width: 100vw !important; height: 100vh !important; object-fit: contain; }
+        /* Force the game to be full-screen and hide scrollbars */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #000;
+        }
+        canvas {
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: contain; /* Prevents stretching the graphics */
+        }
+        #loader {
+            color: white;
+            text-align: center;
+            font-family: sans-serif;
+            padding-top: 20%;
+        }
     </style>
 </head>
 
 <body>
     <div id="content"></div>
-    <div id="loader" style="color:white; text-align:center; padding-top:20%;">Loading ...</div>
+    <div id="loader">Loading Game Assets...</div>
 
-    <script type="text/javascript" src="lib/nape.min.js"></script>
-    <script type="text/javascript" src="lib/phaser.min.js"></script>
-    <script type="text/javascript" src="lib/phaser-cachebuster.min.js"></script>
-    <script type="text/javascript" src="lib/phaser-super-storage.min.js"></script>
-    <script type="text/javascript" src="lib/dragonBones.min.js"></script>
+    <script type="text/javascript" src="assets/lib/nape.min.js"></script>
+    <script type="text/javascript" src="assets/lib/phaser.min.js"></script>
+    <script type="text/javascript" src="assets/lib/phaser-cachebuster.min.js"></script>
+    <script type="text/javascript" src="assets/lib/phaser-super-storage.min.js"></script>
+    <script type="text/javascript" src="assets/lib/dragonBones.min.js"></script>
 
     <script type="text/javascript">
+        // --- AD BLOCKER & AUTO-START LOGIC ---
         var useEvents = (typeof(Event) === 'function');
+
         var myDispatchEvent = function (name){
             var event;
-            if (useEvents){ event = new Event(name); }
-            else { event = document.createEvent('Event'); event.initEvent(name, true, true); }
-            document.getElementById("content").dispatchEvent(event);
+            if (useEvents){
+                event = new Event(name);
+            } else {
+                event = document.createEvent('Event');
+                event.initEvent(name, true, true);
+            }
+            var contentDiv = document.getElementById("content");
+            if(contentDiv) contentDiv.dispatchEvent(event);
         }
 
+        // Mock the GameDistribution options
         window["GD_OPTIONS"] = {
             "gameId": "516d6908fbc848bdb89e65a58a43a7dc",
-            "onEvent": function(event) {},
+            "onEvent": function(event) {
+                // No logic needed here as we bypass the real SDK
+            },
         };
 
-        // Ad Bypass logic
+        // Fake the Ad SDK behavior
+        window.gdsdk = {
+            showAd: function() { return Promise.resolve(); },
+            preloadAd: function() { return Promise.resolve(); },
+            openConsole: function() { console.log("Console opened"); }
+        };
+
+        // Force-start the game logic after the page loads
         window.onload = function() {
+            console.log("Bypassing Ad SDK...");
             setTimeout(function() {
                 myDispatchEvent('SDK_READY');
                 myDispatchEvent('SDK_GAME_START');
-            }, 500);
-        };
-        
-        window.gdsdk = {
-            showAd: function() { return Promise.resolve(); },
-            preloadAd: function() { return Promise.resolve(); }
+                // Hide the loader text once we trigger the start
+                var loader = document.getElementById("loader");
+                if(loader) loader.style.display = "none";
+            }, 1000);
         };
     </script>
 
     <script type="text/javascript" src="basketball_stars.min.js"></script>
 </body>
+
 </html>
